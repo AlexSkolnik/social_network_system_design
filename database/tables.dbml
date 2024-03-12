@@ -1,7 +1,6 @@
-// Для соцстей должна хорошо подъодить графовая БД типа Neo4j, но опыта с ней нет совсем.
-// Поэтому, учитывая ограничения в НФТ по количеству подписок, для хранения всего,
-// кроме фотографий, будем использовать реляционную БД (MySql/Postgres).
-// Для фотографий будем использовать Azure Blob Storage (CDN?)
+// users+followers лучше хранить в Neo4j, но можно обойтись и РСУБД (MySql/Postgres).
+// posts+comments+atachments храним в другой БД (MySql/Postgres)
+// фотографии будем хранить в третьей бд - Azure Blob Storage (CDN?)
 
 Table users {
   id uuid [primary key]
@@ -34,23 +33,23 @@ Table comments {
   id uuid [primary key]
   post_id uuid
   user_id uuid
-  atachment_id uuid
+  image_url varchar
   comment varchar
   created_at timestamp
 }
 
 Table atachments {
   id uuid [primary key]
+  post_id uuid
   image_id uuid
   image_url varchar
   created_at timestamp
 }
 
 Ref: posts.user_id > users.id // many-to-one
-Ref: posts.id < atachments.id// many-to-one
+Ref: posts.id < atachments.post_id// many-to-one
 
 Ref: comments.post_id > posts.id // one-to-one
-Ref: comments.atachment_id - atachments.id // one-to-one
 Ref: comments.user_id > users.id // one-to-one
 
 Ref: users.id < followers.following_user_id
