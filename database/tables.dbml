@@ -1,6 +1,8 @@
-// users+followers лучше хранить в Neo4j, но можно обойтись и РСУБД (MySql/Postgres).
-// posts+comments+atachments храним в другой БД (MySql/Postgres)
-// фотографии будем хранить в третьей бд - Azure Blob Storage (CDN?)
+// 1БД. users+followers харним в графовой БД (Neo4j). Удобное хранение и поиск отношений.
+// 2БД. posts+comments храним в РСУБД (MySql/Postgres). Посты терять нельзя, выбирал между РСУБД и документо-ориентированной БД. Посты хорошо на документ ложатся, а вот комментарии не очень.
+// 3БД. chats+messages храним в РСУБД (MySql/Postgres). Могла бы быть mongoDB, где один документ - это набор сообщений между двумя пользователями. Но размер документа ограничен, долгая переписка может превысить его.
+// 4БД. фотографии будем хранить в blob-storage (AzureBlobStorage/S3). Наиболее подходит для картинок.
+// 5БД. Координаты будем хранить в геоБД (PostGIS). Наиболее подходит для координат, дает мощный поиск.
 
 Table users {
   id uuid [primary key]
@@ -14,6 +16,7 @@ Table users {
 }
 
 Table followers {
+  id uuid
   following_user_id uuid
   followed_user_id uuid
   created_at timestamp
@@ -27,10 +30,13 @@ Table posts {
   user_id uuid
   description text [note: 'Content of the post']
   created_at timestamp
+  images json [note: 'Array of image_url']
+  locationId uuid
   }
 
 Table comments {
   id uuid [primary key]
+  reply_comment_id uuid
   post_id uuid
   user_id uuid
   image_url varchar
@@ -38,19 +44,38 @@ Table comments {
   created_at timestamp
 }
 
-Table atachments {
-  id uuid [primary key]
-  post_id uuid
-  image_id uuid
-  image_url varchar
+Table locations {
+  id uuid
+  latitude decimal
+  longitude decimal
+}
+
+Table chats {
+  id uuid
+  from uuid
+  to uuid
+}
+
+Table messages {
+  id uuid
+  chat_id uuid
+  from uuid
+  to uuid
   created_at timestamp
+  message_text varchar
 }
 
 Ref: posts.user_id > users.id // many-to-one
-Ref: posts.id < atachments.post_id// many-to-one
 
-Ref: comments.post_id > posts.id // one-to-one
-Ref: comments.user_id > users.id // one-to-one
+Ref: comments.post_id > posts.id // many-to-one
+Ref: comments.user_id - users.id // one-to-one
+Ref: locations.id - posts.locationId // one-to-one
 
 Ref: users.id < followers.following_user_id
 Ref: users.id < followers.followed_user_id
+
+Ref: messages.chat_id > chats.id
+Ref: chats.from - users.id
+Ref: chats.to - users.id
+Ref: messages.from - users.id
+Ref: messages.to - users.id
