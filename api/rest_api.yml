@@ -1,0 +1,533 @@
+openapi: 3.0.0
+
+tags:
+  - name: Posts
+  - name: Users
+  - name: Images
+  - name: Chats
+
+info:
+  title: SocialNetwork API
+  description: Current API describes interaction with SocialNetwork
+  version: 1.0.0
+
+paths:
+  /posts:
+    post:
+      summary: Create post
+      description: Method creates post
+      tags:
+        - Posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                created_at:
+                  type: string
+                  format: date-time
+                  description: Creation date and time
+                description:
+                  type: string
+                latitude:
+                  type: string
+                longitude:
+                  type: string
+                attachments:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      image_id:
+                        type: string
+                      image_url:
+                        type: string
+                        format: url
+              required:
+                - long_url
+            examples:
+              request:
+                value:
+                  user_id: "CA92F9F3423197AD11ED970EAAA66ED1"
+                  created_at: "2021-01-30T08:30:00Z"
+                  description: "Побывал в Москве"
+                  latitude: "51.510357"
+                  longitude: "51.510357"
+                  type: string
+                  attachments:
+                    - image_id: "CA92F9F3422197AD11ED970EAAA66ED1"
+                      image_url: https://social_network.cdn.net?photo=CA92F9F3423197AD11ED970EAAA66ED1
+      responses:
+        201:
+          description: Created
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: post_id
+                example: "CA92F9F3422197AD11ED970EAAA66ED1"
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+
+  /posts/{post_id}:
+    delete:
+      summary: Remove post
+      description: Method removes post with post_id
+      tags:
+        - Posts
+      parameters:
+        - name: post_id
+          in: path
+          description: post_id
+          required: true
+          schema:
+            type : string
+      responses:
+        200:
+          description: Ok
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /posts/{post_id}/comments/{page}:
+    get:
+      summary: Getting comments
+      description: Method loads comments to the post with post_id
+      tags:
+        - Posts
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type : string
+        - name: page
+          in: path
+          required: true
+          schema:
+            type : number
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    comment_id:
+                      type: string
+                    user_id:
+                      type: string
+                    user_name:
+                      type: string
+                    user_image_url:
+                      type: string
+                      format: url
+                    created_at:
+                      type: string
+                      format: date-time
+                      description: Creation date and time
+                    comment:
+                      type: string
+                    attachment:
+                      type: object
+                      properties:
+                        image_id:
+                          type: string
+                        image_url:
+                          type: string
+                          format: url                                
+              examples:
+                response:
+                  value:
+                    - comment_id: "CA92F9F3423197AD11ED970EAAA66ED1"
+                      user_id: "CA92F9F3423197AD11ED970EAAA66ED1"
+                      user_name: "Иван Иванов"
+                      created_at: "2021-01-30T08:30:00Z"
+                      comment: "Красивое место"
+                      user_image_url: https://social_network.cdn.net?photo=CA92F9F3423197AD11ED970EAAA66ED1
+                      attachments:
+                        - image_id: "CA92F9F3422197AD11ED970EAAA66ED1"
+                          image_url: https://social_network.cdn.net?photo=CA92F9F3423197AD11ED970EAAA66ED1
+        302:
+          description: Redirect
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /posts/{post_id}/comments:
+    post:
+      summary: Add comment
+      description: Method adds a comment to the post
+      tags:
+        - Posts
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type : string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                created_at:
+                  type: string
+                  format: date-time
+                  description: Creation date and time
+                comment:
+                  type: string
+                attachment:
+                  type: object
+                  properties:
+                    image_id:
+                      type: string
+                    image_url:
+                      type: string
+                      format: url
+              required:
+                - long_url
+            examples:
+              request:
+                value:
+                  user_id: "CA92F9F3423197AD11ED970EAAA66ED1"
+                  created_at: "2021-01-30T08:30:00Z"
+                  comment: "Тоже нравится это место"
+                  attachment:
+                    image_id: "CA92F9F3422197AD11ED970EAAA66ED1"
+                    image_url: https://social_network.cdn.net?photo=CA92F9F3423197AD11ED970EAAA66ED1
+      responses:
+        201:
+          description: Created
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: comment_id
+                example: "CA92F9F3422197AD11ED970EAAA66ED1"
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+
+  /posts/{post_id}/comments/{comment_id}:
+    delete:
+      summary: Remove comment
+      description: Method removes comment from post
+      tags:
+        - Posts
+      parameters:
+        - name: post_id
+          in: path
+          description: post_id
+          required: true
+          schema:
+            type : string
+        - name: comment_id
+          in: path
+          description: comment_id
+          required: true
+          schema:
+            type : string
+      responses:
+        200:
+          description: Ok
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /{user_id}/feed/{page}:
+    get:
+      summary: Getting the user's feed
+      description: Method
+      tags:
+        - Users
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type : string
+        - name: page
+          in: path
+          required: true
+          schema:
+            type : number
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    post_id:
+                      type: string
+                    user_id:
+                      type: string
+                    like_count:
+                      type: integer
+                    user_name:
+                      type: string
+                    user_image_url:
+                      type: string
+                      format: url
+                    created_at:
+                      type: string
+                      format: date-time
+                      description: Creation date and time
+                    description:
+                      type: string
+                    latitude:
+                      type: string
+                    longitude:
+                      type: string
+                    attachments:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          image_id:
+                            type: string
+                          image_url:
+                            type: string
+                            format: url                                
+              examples:
+                response:
+                  value:
+                    - post_id: "CA92F9F3422197AD11ED970EAAA66ED1"
+                      user_id: "CA92F9F3423197AD11ED970EAAA66ED1"
+                      like_count : 145784
+                      user_name: "Иван Иванов"
+                      created_at: "2021-01-30T08:30:00Z"
+                      description: "Побывал в Москве"
+                      latitude: "51.510357"
+                      longitude: "51.510357"
+                      image_url: https://social_network.cdn.net?photo=CA92F9F3423197AD11ED970EAAA66ED1
+                      attachments:
+                        - image_id: "CA92F9F3422197AD11ED970EAAA66ED1"
+                          image_url: https://social_network.cdn.net?photo=CA92F9F3423197AD11ED970EAAA66ED1
+        302:
+          description: Redirect
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /images:
+    post:
+      summary: Upload image
+      description: Method upload image to cdn
+      tags:
+        - Images
+      parameters:
+        - name: user_id
+          in: header
+          required: true
+          schema:
+            type : string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  image_id:
+                    type: string
+                    format: uuid
+                  image_url:
+                    type: string
+                    format: url
+              examples:
+                request:
+                  value:
+                    image_id: "CA92F9F3422197AD11ED970EAAA66ED1"
+                    image_url: https://social_network.cdn.net?photo=CA92F9F3423197AD11ED970EAAA66ED1
+    
+        400:
+          description: Bad Request
+        500:
+          description: Server error
+
+  /chats/{page}:
+    get:
+      summary: Getting chats for user
+      tags:
+        - Chats
+      parameters:
+        - name: user_id
+          in: header
+          required: true
+          schema:
+            type : string
+        - name: page
+          in: path
+          required: true
+          schema:
+            type : number
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    chat_id:
+                      type: string
+                    user_id:
+                      type: string
+                    user_name:
+                      type: string
+                    user_image_url:
+                      type: string
+                      format: url                            
+              examples:
+                response:
+                  value:
+                    - chat_id: "CA92F9F3423197AD11ED970EAAA66ED1"
+                      from_user_id: "CA92F9F3423197AD11ED970EAAA66ED1"
+                      user_name: "Иван Иванов"
+                      user_image_url: https://social_network.cdn.net?photo=CA92F9F3423197AD11ED970EAAA66ED1
+        302:
+          description: Redirect
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /chats/{chat_id}/messages/{page}:
+    get:
+      summary: Getting messages for chat_id
+      tags:
+        - Chats
+      parameters:
+        - name: user_id
+          in: header
+          required: true
+          schema:
+            type : string
+        - name: chat_id
+          in: path
+          required: true
+          schema:
+            type : string
+        - name: page
+          in: path
+          required: true
+          schema:
+            type : number
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    message_id:
+                      type: string
+                    text:
+                      type: string
+                    from_user_id:
+                      type: string
+                    user_name:
+                      type: string
+                    user_image_url:
+                      type: string
+                      format: url
+                    created_at:
+                      type: string
+                      format: date-time                                   
+              examples:
+                response:
+                  value:
+                    - message_id: "CA92F9F3423197AD11ED970EAAA66ED1"
+                      from_user_id: "CA92F9F3423197AD11ED970EAAA66ED1"
+                      user_name: "Иван Иванов"
+                      text: "Привет, ты когда последний раз ездил в Москву?"
+                      created_at: "2021-01-30T08:30:00Z"                     
+                      user_image_url: https://social_network.cdn.net?photo=CA92F9F3423197AD11ED970EAAA66ED1
+        302:
+          description: Redirect
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+
+  /chats/{chat_id}/messages:
+    post:
+      summary: Send message to chat_id
+      tags:
+        - Chats
+      parameters:
+        - name: user_id
+          in: header
+          required: true
+          schema:
+            type : string
+        - name: chat_id
+          in: path
+          required: true
+          schema:
+            type : string
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                    type: string 
+                  to_user_id:
+                    type: string                               
+              examples:
+                response:
+                  value:
+                    text: "Привет, ты когда последний раз ездил в Москву?"
+                    to_user_id: "CA92F9F3423197AD11ED970EAAA66ED1"
+        302:
+          description: Redirect
+        404:
+          description: Not found
+        500:
+          description: Server error
