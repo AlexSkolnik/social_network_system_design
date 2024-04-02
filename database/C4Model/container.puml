@@ -14,16 +14,37 @@ Person(user, User, "A user of Social Network")
 
 System_Boundary(c1, "Social Network System") {
      Container(balancer, "Balancer", "Nginx, Gateway", "", $tags = "microService")
-     Container(media_service, "Media", "Media service", "", $tags = "microService")
+     Container(media_service, "Media service", "ASP.NET", "", $tags = "microService")
+     ContainerDb(temp_image_db, "Image Database", "Blob storage", "Stores temporary images", $tags = "storage")
+     ContainerDb(image_db, "Image Database", "Blob storage", "Stores images", $tags = "storage")
+    
+     ContainerDb(post_db, "Posts Database", "Postgres", "Stores posts", $tags = "storage")
+     ContainerDb(location_db, "Locaions Database", "PostGis", "Stores locations", $tags = "storage")
+     Container(post_service, "Post Service", "ASP.NET", "", $tags = "microService")
+     Container(message_bus, "Message Bus", "RabbitMQ", "Transport for business events")
+    
+     Container(user_service, "Users Service", "ASP.NET", "", $tags = "microService")
+     ContainerDb(user_db, "Users/Folowers Database", "Neo4j", "Stores users and folowers", $tags = "storage")
     ' Container(message_bus, "Message Bus", "RabbitMQ", "Transport for business events")
     ' Container(reporting_service, "Reporting Service", "Ruby", "Creates normalised data for reporting purposes", $tags = "microService")
-    ' Container(audit_service, "Audit Service", "C#/.NET", "Provides organisation-wide auditing facilities", $tags = "microService")
     ' ContainerDb(user_db, "User Database", "Oracle 12c", "Stores user information", $tags = "storage")
     ' ContainerDb(reporting_db, "Reporting Database", "MySQL", "Stores a normalized version of all business data for ad hoc reporting purposes", $tags = "storage")
     ' Container(audit_store, "Audit Store", "Event Store", "Stores information about events that have happened", $tags = "storage")
 }
 
-Rel_R(user, balancer, "Uses", "HTTPS")
+Rel_R(user, balancer, "", "HTTPS")
+Rel_U(balancer, media_service, "", "HTTPS")
+Rel_U(media_service, temp_image_db, "", "HTTPS")
+Rel_U(media_service, image_db, "", "HTTPS")
+
+Rel_R(balancer, post_service, "", "HTTPS")
+Rel_R(post_service, post_db, "", "HTTPS")
+Rel(post_service, location_db, "", "HTTPS")
+Rel_U(post_service, message_bus, "", "AMQP")
+Rel_L(message_bus, media_service, "", "AMQP")
+
+Rel_D(balancer, user_service, "", "HTTPS")
+Rel_D(user_service, user_db, "", "HTTPS")
 
 ' Rel_D(app, user_service, "Updates user information using", "async, JSON/HTTPS")
 
