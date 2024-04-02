@@ -13,8 +13,8 @@ title Container diagram for Social Network System
 Person(user, User, "A user of Social Network")
 
 System_Boundary(c1, "Social Network System") {
-    ' Container(app, "User Application", "Javascript, Angular", "Allows users to manage their profile")
-    ' Container(user_service, "User Service", "Java, Spring Boot", "The point of access for user information", $tags = "microService")
+     Container(balancer, "Balancer", "Nginx, Gateway", "", $tags = "microService")
+     Container(media_service, "Media", "Media service", "", $tags = "microService")
     ' Container(message_bus, "Message Bus", "RabbitMQ", "Transport for business events")
     ' Container(reporting_service, "Reporting Service", "Ruby", "Creates normalised data for reporting purposes", $tags = "microService")
     ' Container(audit_service, "Audit Service", "C#/.NET", "Provides organisation-wide auditing facilities", $tags = "microService")
@@ -23,7 +23,7 @@ System_Boundary(c1, "Social Network System") {
     ' Container(audit_store, "Audit Store", "Event Store", "Stores information about events that have happened", $tags = "storage")
 }
 
-' Rel_D(user, app, "Uses", "HTTPS")
+Rel_R(user, balancer, "Uses", "HTTPS")
 
 ' Rel_D(app, user_service, "Updates user information using", "async, JSON/HTTPS")
 

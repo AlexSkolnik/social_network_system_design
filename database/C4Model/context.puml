@@ -12,23 +12,26 @@ title Context diagram for Social Network System
 Person(user, User, "A user of Social Network")
 
 Enterprise_Boundary(c0, "Social Network System") {
-    System(feedSystem, "Feed system", "The post feed viewing system")
+    System(feed_system, "Feed system", "The post feed viewing system")
 
-    System(chatSystem, "Chat System", "The messaging system")
+    System(chat_system, "Chat System", "The messaging system")
 
-    System(postSystem, "Post System", "The system of working with posts")
+    System(post_system, "Post System", "The system of working with posts")
+
+    System(media_system, "Media System", "The system of upload images")
 }
 
 System_Ext(cdn, "CDN", "Content delivery network")
 
-Rel(user, feedSystem, "Read feed")
+Rel(user, feed_system, "Read feed")
 
-Rel(user, chatSystem, "Send message")
-Rel(chatSystem, user, "Read messages")
+Rel(user, chat_system, "Send message")
+Rel(chat_system, user, "Read messages")
 
-Rel(user, postSystem, "Publish/Comment post")
+Rel(user, post_system, "Publish/Comment post")
+Rel(user, media_system, "Publish/Comment post")
 
-Rel_D(postSystem, cdn, "Upload images")
-Rel_U(cdn, feedSystem, "Download images")
+Rel_D(media_system, cdn, "Upload images")
+Rel_U(cdn, post_system, "Download images")
 
 @enduml
