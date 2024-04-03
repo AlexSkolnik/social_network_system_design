@@ -1,10 +1,8 @@
 @startuml "enterprise"
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
-' uncomment the following line and comment the first to use locally
-' !include C4_Context.puml
 
 LAYOUT_TOP_DOWN()
-'LAYOUT_AS_SKETCH()
+LAYOUT_AS_SKETCH()
 LAYOUT_WITH_LEGEND()
 
 title Context diagram for Social Network System

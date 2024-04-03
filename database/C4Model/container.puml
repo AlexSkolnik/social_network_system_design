@@ -1,7 +1,5 @@
 @startuml "messagebus"
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
-' uncomment the following line and comment the first to use locally
-' !include C4_Container.puml
 
 AddElementTag("microService", $shape=EightSidedShape(), $bgColor="CornflowerBlue", $fontColor="white", $legendText="micro service\neight sided")
 AddElementTag("storage", $shape=RoundedBoxShape(), $bgColor="lightSkyBlue", $fontColor="white")
@@ -21,44 +19,46 @@ System_Boundary(c1, "Social Network System") {
      ContainerDb(post_db, "Posts Database", "Postgres", "Stores posts", $tags = "storage")
      ContainerDb(location_db, "Locaions Database", "PostGis", "Stores locations", $tags = "storage")
      Container(post_service, "Post Service", "ASP.NET", "", $tags = "microService")
-     Container(message_bus, "Message Bus", "RabbitMQ", "Transport for business events")
+     Container(message_bus, "Message Bus", "RabbitMQ", "")
+     Container(message_broker, "Message Bus", "Kafka", "")
     
      Container(user_service, "Users Service", "ASP.NET", "", $tags = "microService")
-     ContainerDb(user_db, "Users/Folowers Database", "Neo4j", "Stores users and folowers", $tags = "storage")
-    ' Container(message_bus, "Message Bus", "RabbitMQ", "Transport for business events")
-    ' Container(reporting_service, "Reporting Service", "Ruby", "Creates normalised data for reporting purposes", $tags = "microService")
-    ' ContainerDb(user_db, "User Database", "Oracle 12c", "Stores user information", $tags = "storage")
-    ' ContainerDb(reporting_db, "Reporting Database", "MySQL", "Stores a normalized version of all business data for ad hoc reporting purposes", $tags = "storage")
-    ' Container(audit_store, "Audit Store", "Event Store", "Stores information about events that have happened", $tags = "storage")
+     ContainerDb(user_db, "Users Database", "Neo4j", "", $tags = "storage")
+   
+   
+     ContainerDb(chat_db, "Chats Database", "Postgres", "Stores messages", $tags = "storage")
+     Container(chat_service, "Chat Service", "ASP.NET, SignalR", "", $tags = "microService")
+
+     ContainerDb(feed_db, "Feed Database", "Redis", "Stores feeds", $tags = "storage")
+     Container(feed_service, "Feed Service", "ASP.NET", "", $tags = "microService")
 }
 
 Rel_R(user, balancer, "", "HTTPS")
+Rel_R(user, chat_service, "", "WebSocket")
+
+Rel_R(chat_service, chat_db, "", "HTTPS")
+
+Rel_D(balancer, user_service, "", "HTTPS")
+Rel_D(user_service, user_db, "", "HTTPS")
+Rel_L(feed_service, user_service, "", "gRPC")
+
 Rel_U(balancer, media_service, "", "HTTPS")
 Rel_U(media_service, temp_image_db, "", "HTTPS")
 Rel_U(media_service, image_db, "", "HTTPS")
 
 Rel_R(balancer, post_service, "", "HTTPS")
 Rel_R(post_service, post_db, "", "HTTPS")
-Rel(post_service, location_db, "", "HTTPS")
+Rel_R(post_service, location_db, "", "HTTPS")
+
 Rel_U(post_service, message_bus, "", "AMQP")
-Rel_L(message_bus, media_service, "", "AMQP")
+Rel_R(media_service, message_bus, "", "AMQP")
 
-Rel_D(balancer, user_service, "", "HTTPS")
-Rel_D(user_service, user_db, "", "HTTPS")
-
-' Rel_D(app, user_service, "Updates user information using", "async, JSON/HTTPS")
-
-' Rel_U(user_service, app, "Sends events to", "WebSocket")
-' Rel_U(user_service, message_bus, "Sends user update events to")
-' Rel(user_service, user_db, "Stores data in", "JDBC")
-
-' Rel(message_bus, reporting_service, "Sends user update events to")
-' Rel(message_bus, audit_service, "Sends user update events to")
-
-' Rel(reporting_service, reporting_db, "Stores data in")
-' Rel(audit_service, audit_store, "Stores events in")
-
-' Lay_R(reporting_service, audit_service)
+Rel_D(balancer, feed_service, "", "HTTPS")
+Rel_D(feed_service, feed_db, "", "HTTPS")
+Rel_R(feed_service, post_service, "", "gRPC")
+Rel_D(post_service, message_broker, "", "TCP")
+Rel_L(feed_service, message_broker, "", "TCP")
+Rel(user_service, message_broker, "", "TCP")
 
 SHOW_LEGEND()
 @enduml
