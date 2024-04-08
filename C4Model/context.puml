@@ -1,0 +1,35 @@
+@startuml "enterprise"
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_TOP_DOWN()
+LAYOUT_AS_SKETCH()
+LAYOUT_WITH_LEGEND()
+
+title Context diagram for Social Network System
+
+Person(user, User, "A user of Social Network")
+
+Enterprise_Boundary(c0, "Social Network System") {
+    System(feed_system, "Feed system", "The post feed viewing system")
+
+    System(chat_system, "Chat System", "The messaging system")
+
+    System(post_system, "Post System", "The system of working with posts")
+
+    System(media_system, "Media System", "The system of upload images")
+}
+
+System_Ext(cdn, "CDN", "Content delivery network")
+
+Rel(user, feed_system, "Read feed")
+
+Rel(user, chat_system, "Send message")
+Rel(chat_system, user, "Read messages")
+
+Rel(user, post_system, "Publish/Comment post")
+Rel(user, media_system, "Publish/Comment post")
+
+Rel_D(media_system, cdn, "Upload images")
+Rel_U(cdn, post_system, "Download images")
+
+@enduml
